@@ -1,0 +1,293 @@
+openapi: "3.0.1"
+info:
+  title: Congress.gov API
+  description: |-
+    The Congress.gov API provides programmatic access to legislative data
+    from the United States Congress. This API enables developers to search,
+    retrieve, and analyze legislative data including bills, resolutions,
+    amendments, and congressional records.
+
+    This is NOT the official congress.gov YAML and contains modifications.
+
+    Currently only supports 1/100 API operations.
+  contact:
+    email: "liudotjson@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  version: "1.0.4"
+externalDocs:
+  description: "Official documentation"
+  url: "https://api.congress.gov/"
+servers:
+  - url: "https://api.congress.gov/v3"
+paths:
+  /member:
+    get:
+      tags:
+      - "Congress"
+      summary: "Returns a list of congressional members."
+      description: |
+        Get congress member list.
+        Supports query parameters for pagination and filtering.
+      operationId: "getMembers"
+      parameters:
+        - $ref: "#/components/parameters/Offset"
+        - $ref: "#/components/parameters/LimitMax250"
+        - $ref: "#/components/parameters/FromDateTimeUpdateDate"
+        - $ref: "#/components/parameters/ToDateTimeUpdateDate"
+        - $ref: "#/components/parameters/CurrentMember"
+      responses:
+        "200":
+          $ref: "#/components/responses/CongressMemberListResponse"
+        "400":
+          $ref: "#/components/responses/CongressMemberListErrorResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "429":
+          $ref: "#/components/responses/RateLimitErrorResponse"
+
+components:
+  parameters:
+    Offset:
+      name: "offset"
+      in: "query"
+      description: "The starting record returned. 0 is the first record."
+      required: false
+      schema:
+        type: "integer"
+        minimum: 0
+    LimitMax250:
+      name: "limit"
+      in: "query"
+      description: "The number of records returned. The maximum limit is 250."
+      required: false
+      schema:
+        type: "integer"
+        minimum: 0
+        maximum: 250
+    FromDateTimeUpdateDate:
+      name: "fromDateTime"
+      in: "query"
+      description: "The starting timestamp to filter by update date. Use format: YYYY-MM-DDT00:00:00Z."
+      required: false
+      schema:
+        type: "string"
+        pattern: "^\\d{4}-\\d{2}-\\d{2}T00:00:00Z$"
+        format: "date-time"
+    ToDateTimeUpdateDate:
+      name: "toDateTime"
+      in: "query"
+      description: "The ending timestamp to filter by update date. Use format: YYYY-MM-DDT00:00:00Z."
+      required: false
+      schema:
+        type: "string"
+        pattern: "^\\d{4}-\\d{2}-\\d{2}T00:00:00Z$"
+        format: "date-time"
+    CurrentMember:
+      name: "currentMember"
+      in: "query"
+      description: "The status of the member."
+      required: false
+      schema:
+        type: "boolean"
+  schemas:
+    BioguideId:
+      description: "The member's Biographical Directory ID."
+      type: "string"
+      minLength: 7
+      maxLength: 7
+      pattern: "^[A-Z]\\d{6}$"
+    BioguideDepiction:
+      description: "The member's Biographical Directory picture."
+      type: "object"
+      required:
+      - "attribution"
+      - "imageUrl"
+      properties:
+        attribution:
+          description: "The source of the image."
+          type: "string"
+        imageUrl:
+          description: "The image URL."
+          type: "string"
+    Name:
+      description: "Congress member name."
+      type: "string"
+    PartyName:
+      description: "Party name."
+      type: "string"
+    State:
+      description: "State name."
+      type: "string"
+    Terms:
+      description: "Terms served."
+      type: "object"
+      properties:
+        members:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/TermItem"
+      required:
+      - "members"
+    TermItem:
+      description: "Term in Congress."
+      type: "object"
+      properties:
+        chamber:
+          $ref: "#/components/schemas/Chamber"
+        endYear:
+          $ref: "#/components/schemas/TermEndYear"
+        startYear:
+          $ref: "#/components/schemas/TermStartYear"
+      required:
+      - "startYear"
+      - "chamber"
+    Chamber:
+      description: "Chamber of Congress."
+      type: "string"
+      enum:
+      - "House of Representatives"
+      - "Senate"
+    TermEndYear:
+      description: "End year of the term."
+      type: "integer"
+    TermStartYear:
+      description: "Start year of the term."
+      type: "integer"
+    UpdateDate:
+      description: "Time the record was last updated. Format: YYYY-MM-DDT00:00:00Z."
+      type: "string"
+      pattern: "^\\d{4}-\\d{2}-\\d{2}T00:00:00Z$"
+      format: "date-time"
+    ForbiddenErrorResponse:
+      type: "object"
+      properties:
+        error:
+          title: "ForbiddenError"
+          type: "object"
+          properties:
+            code:
+              type: "string"
+              enum:
+                - "API_KEY_INVALID"
+                - "API_KEY_MISSING"
+              description: "The specific error code indicating the type of error."
+            message:
+              type: "string"
+              description: "A human-readable message explaining the error."
+          required:
+            - "code"
+            - "message"
+      required:
+        - "error"
+  responses:
+    ForbiddenError:
+      description: "Forbidden - API key is missing or invalid."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ForbiddenErrorResponse'
+    CongressMemberListResponse:
+      description: "Successful operation."
+      content:
+        application/json:
+          schema:
+            title: "CongressMemberListResponse"
+            type: "object"
+            required:
+            - "members"
+            - "pagination"
+            properties:
+              members:
+                description: "List of Congress members."
+                type: "array"
+                items:
+                  title: "CongressMemberOverview"
+                  type: "object"
+                  required:
+                  - "bioguideId"
+                  - "name"
+                  - "partyName"
+                  - "state"
+                  - "terms"
+                  - "updateDate"
+                  properties:
+                    bioguideId:
+                      $ref: "#/components/schemas/BioguideId"
+                    depiction:
+                      $ref: "#/components/schemas/BioguideDepiction"
+                    name:
+                      $ref: "#/components/schemas/Name"
+                    partyName:
+                      $ref: "#/components/schemas/PartyName"
+                    state:
+                      $ref: "#/components/schemas/State"
+                    terms:
+                      $ref: "#/components/schemas/Terms"
+                    updateDate:
+                      $ref: "#/components/schemas/UpdateDate"
+              pagination:
+                title: "Pagination"
+                description: "Pagination object."
+                type: "object"
+                required:
+                - "count"
+                properties:
+                  count:
+                    description: "Total number of records."
+                    type: "integer"
+                  next:
+                    description: "URL of the next page of records."
+                    type: "string"
+                    format: "uri"
+                  prev:
+                    description: "URL of the next page of records."
+                    type: "string"
+                    format: "uri"
+    CongressMemberListErrorResponse:
+      description: "Bad request."
+      content:
+        application/json:
+          schema:
+            title: "CongressMemberListErrorResponse"
+            type: "object"
+            required:
+            - "error"
+            properties:
+              error:
+                description: "Error message."
+                type: "string"
+    RateLimitErrorResponse:
+      description: "Rate limit exceeded."
+      content:
+        application/json:
+          schema:
+            title: "RateLimitErrorResponse"
+            type: "object"
+            required:
+            - "error"
+            properties:
+              error:
+                title: "RateLimitError"
+                description: "Error object."
+                type: "object"
+                required:
+                - "code"
+                - "message"
+                properties:
+                  code:
+                    description: "Error code."
+                    type: "string"
+                    enum:
+                    - "OVER_RATE_LIMIT"
+                  message:
+                    description: "Error message."
+                    type: "string"
+  securitySchemes:
+    ApiKeyAuth:
+      type: "apiKey"
+      in: "query"
+      name: "api_key"
+security:
+  - ApiKeyAuth: []
