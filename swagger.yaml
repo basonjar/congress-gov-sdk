@@ -15,7 +15,7 @@ info:
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-  version: "1.0.5"
+  version: "1.0.6"
 externalDocs:
   description: "Official documentation"
   url: "https://api.congress.gov/"
@@ -391,83 +391,89 @@ components:
         application/json:
           schema:
             title: "CongressMemberDetailsResponse"
-            type: "object"
+            type: object
             required:
-              - "bioguideId"
-              - "birthYear"
-              - "currentMember"
-              - "directOrderName"
-              - "firstName"
-              - "invertedOrderName"
-              - "lastName"
-              - "officialWebsiteUrl"
-              - "state"
-              - "terms"
-              - "updateDate"
+              - "member"
             properties:
-              addressInformation:
-                $ref: "#/components/schemas/AddressInformation"
-              bioguideId:
-                $ref: "#/components/schemas/BioguideId"
-              birthYear:
-                $ref: "#/components/schemas/BirthYear"
-              cosponsoredLegislation:
-                title: "CosponsoredLegislation"
+              member:
+                title: "CongressMemberDetails"
                 type: "object"
+                required:
+                  - "bioguideId"
+                  - "birthYear"
+                  - "currentMember"
+                  - "directOrderName"
+                  - "firstName"
+                  - "invertedOrderName"
+                  - "lastName"
+                  - "officialWebsiteUrl"
+                  - "state"
+                  - "terms"
+                  - "updateDate"
                 properties:
-                  count:
-                    description: "Total number of cosponsored legislation."
-                    type: "integer"
-              currentMember:
-                description: "Is the member currently serving."
-                type: "boolean"
-              depiction:
-                $ref: "#/components/schemas/BioguideDepiction"
-              directOrderName:
-                description: "Direct order name."
-                type: "string"
-              district:
-                description: "District number."
-                type: integer
-              firstName:
-                description: "First name."
-                type: "string"
-              honorificName:
-                description: "Honorific name."
-                type: "string"
-              invertedOrderName:
-                description: "Inverted order name."
-                type: "string"
-              lastName:
-                description: "Last name."
-                type: "string"
-              middleName:
-                description: "Middle name."
-                type: "string"
-              nickName:
-                description: "Nick name."
-                type: "string"
-              officialWebsiteUrl:
-                description: "Official website URL."
-                type: "string"
-              partyHistory:
-                $ref: "#/components/schemas/PartyHistory"
-              sponsoredLegislation:
-                title: "SponsoredLegislation"
-                type: "object"
-                properties:
-                  count:
-                    description: "Total number of sponsored legislation."
-                    type: "integer"
-              state:
-                $ref: "#/components/schemas/State"
-              suffixName:
-                description: "Suffix name."
-                type: "string"
-              terms:
-                $ref: "#/components/schemas/DetailedTerms"
-              updateDate:
-                $ref: "#/components/schemas/UpdateDate"
+                  addressInformation:
+                    $ref: "#/components/schemas/AddressInformation"
+                  bioguideId:
+                    $ref: "#/components/schemas/BioguideId"
+                  birthYear:
+                    $ref: "#/components/schemas/BirthYear"
+                  cosponsoredLegislation:
+                    title: "CosponsoredLegislation"
+                    type: "object"
+                    properties:
+                      count:
+                        description: "Total number of cosponsored legislation."
+                        type: "integer"
+                  currentMember:
+                    description: "Is the member currently serving."
+                    type: "boolean"
+                  depiction:
+                    $ref: "#/components/schemas/BioguideDepiction"
+                  directOrderName:
+                    description: "Direct order name."
+                    type: "string"
+                  district:
+                    description: "District number."
+                    type: integer
+                  firstName:
+                    description: "First name."
+                    type: "string"
+                  honorificName:
+                    description: "Honorific name."
+                    type: "string"
+                  invertedOrderName:
+                    description: "Inverted order name."
+                    type: "string"
+                  lastName:
+                    description: "Last name."
+                    type: "string"
+                  middleName:
+                    description: "Middle name."
+                    type: "string"
+                  nickName:
+                    description: "Nick name."
+                    type: "string"
+                  officialWebsiteUrl:
+                    description: "Official website URL."
+                    type: "string"
+                  partyHistory:
+                    $ref: "#/components/schemas/PartyHistory"
+                  sponsoredLegislation:
+                    title: "SponsoredLegislation"
+                    type: "object"
+                    properties:
+                      count:
+                        description: "Total number of sponsored legislation."
+                        type: "integer"
+                  state:
+                    $ref: "#/components/schemas/State"
+                  suffixName:
+                    description: "Suffix name."
+                    type: "string"
+                  terms:
+                    $ref: "#/components/schemas/DetailedTerms"
+                  updateDate:
+                    $ref: "#/components/schemas/UpdateDate"
     CongressMemberDetailsErrorResponse:
       description: "Member not found."
       content:
