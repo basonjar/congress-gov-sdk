@@ -9,13 +9,31 @@ info:
 
     This is NOT the official congress.gov YAML and contains modifications.
 
-    Currently only supports 1/100 API operations.
+    Currently only supports 2/100 API operations.
+    Bill API: 0/16
+    Amendments API: 0/8
+    Summaries API: 0/3
+    Congress API: 0/3
+    Member API: 2/8
+    Committee API: 0/10
+    Committee Report API: 0/5
+    Committee Print API: 0/5
+    Committee Meeting API: 0/4
+    Hearing API: 0/4
+    Congressional Record API: 0/1
+    Daily Congressional Record API: 0/4
+    Bound Congressional Record API: 0/4
+    House Communication API: 0/4
+    House Requirement API: 0/3
+    Senate Communication API: 0/4
+    Nomination API: 0/7
+    Treaty API: 0/7
   contact:
     email: "liudotjson@gmail.com"
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-  version: "1.0.4"
+  version: "1.0.6"
 externalDocs:
   description: "Official documentation"
   url: "https://api.congress.gov/"
@@ -25,7 +43,7 @@ paths:
   /member:
     get:
       tags:
-      - "Congress"
+        - "Congress"
       summary: "Returns a list of congressional members."
       description: |
         Get congress member list.
@@ -46,9 +64,34 @@ paths:
           $ref: "#/components/responses/ForbiddenError"
         "429":
           $ref: "#/components/responses/RateLimitErrorResponse"
-
+  /member/{bioguideId}:
+    get:
+      tags:
+        - "Congress"
+      summary: "Returns details of a single congressional member."
+      description: |
+        Get a member's details from their bioguideId.
+      operationId: "getMemberDetails"
+      parameters:
+        - $ref: "#/components/parameters/BioguideId"
+      responses:
+        "200":
+          $ref: "#/components/responses/CongressMemberDetailsResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/CongressMemberDetailsErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitErrorResponse"
 components:
   parameters:
+    BioguideId:
+      name: "bioguideId"
+      in: "path"
+      required: true
+      description: "The member's Biographical Directory ID."
+      schema:
+        $ref: "#/components/schemas/BioguideId"
     Offset:
       name: "offset"
       in: "query"
@@ -102,8 +145,8 @@ components:
       description: "The member's Biographical Directory picture."
       type: "object"
       required:
-      - "attribution"
-      - "imageUrl"
+        - "attribution"
+        - "imageUrl"
       properties:
         attribution:
           description: "The source of the image."
@@ -120,6 +163,61 @@ components:
     State:
       description: "State name."
       type: "string"
+    DetailedTerms:
+      description: "Detailed terms served."
+      type: "array"
+      items:
+        $ref: "#/components/schemas/DetailedTermItem"
+    DetailedTermItem:
+      description: "Detailed term in Congress."
+      type: "object"
+      properties:
+        chamber:
+          $ref: "#/components/schemas/Chamber"
+        congress:
+          description: "Congress number."
+          type: "integer"
+        district:
+          description: "District number."
+          type: "integer"
+        endYear:
+          $ref: "#/components/schemas/TermEndYear"
+        memberType:
+          $ref: "#/components/schemas/MemberType"
+        startYear:
+          $ref: "#/components/schemas/TermStartYear"
+        stateCode:
+          $ref: "#/components/schemas/StateCode"
+        stateName:
+          $ref: "#/components/schemas/State"
+    StateCode:
+      description: "State code."
+      type: "string"
+      minLength: 2
+      maxLength: 2
+      pattern: "^[A-Z]{2}$"
+    MemberType:
+      description: "Member type."
+      type: "string"
+      enum:
+        - "Representative"
+        - "Senator"
+    LeadershipRoles:
+      description: "Leadership role."
+      type: "array"
+      items:
+        type: "object"
+        title: "LeadershipRole"
+        properties:
+          congress:
+            description: "Congress number."
+            type: "integer"
+          current:
+            description: "Is the member currently serving."
+            type: "boolean"
+          type:
+            description: "Leadership role type."
+            type: "string"
     Terms:
       description: "Terms served."
       type: "object"
@@ -129,7 +227,7 @@ components:
           items:
             $ref: "#/components/schemas/TermItem"
       required:
-      - "members"
+        - "members"
     TermItem:
       description: "Term in Congress."
       type: "object"
@@ -141,14 +239,14 @@ components:
         startYear:
           $ref: "#/components/schemas/TermStartYear"
       required:
-      - "startYear"
-      - "chamber"
+        - "startYear"
+        - "chamber"
     Chamber:
       description: "Chamber of Congress."
       type: "string"
       enum:
-      - "House of Representatives"
-      - "Senate"
+        - "House of Representatives"
+        - "Senate"
     TermEndYear:
       description: "End year of the term."
       type: "integer"
@@ -160,6 +258,53 @@ components:
       type: "string"
       pattern: "^\\d{4}-\\d{2}-\\d{2}T00:00:00Z$"
       format: "date-time"
+    BirthYear:
+      description: "Year of birth."
+      type: "integer"
+    AddressInformation:
+      description: "Address information."
+      type: "object"
+      properties:
+        city:
+          description: "City."
+          type: "string"
+        district:
+          description: "District."
+          type: "string"
+        officeAddress:
+          description: "Office address."
+          type: "string"
+        phoneNumber:
+          description: "Phone number."
+          type: "string"
+        zipCode:
+          description: "Zip code."
+          type: integer
+    PartyHistory:
+      description: "Party history."
+      type: "array"
+      items:
+        $ref: "#/components/schemas/PartyHistoryItem"
+    PartyHistoryItem:
+      description: "Historical party information."
+      type: "object"
+      required:
+        - "partyAbbreviation"
+        - "partyName"
+        - "startYear"
+      properties:
+        partyAbbreviation:
+          description: "Party abbreviation."
+          type: "string"
+        partyName:
+          description: "Party name."
+          type: "string"
+        startYear:
+          description: "Start year."
+          type: "integer"
+        endYear:
+          description: "End year."
+          type: "integer"
     ForbiddenErrorResponse:
       type: "object"
       properties:
@@ -189,15 +334,15 @@ components:
           schema:
             $ref: '#/components/schemas/ForbiddenErrorResponse'
     CongressMemberListResponse:
-      description: "Successful operation."
+      description: "Congress member list."
       content:
         application/json:
           schema:
             title: "CongressMemberListResponse"
             type: "object"
             required:
-            - "members"
-            - "pagination"
+              - "members"
+              - "pagination"
             properties:
               members:
                 description: "List of Congress members."
@@ -206,12 +351,12 @@ components:
                   title: "CongressMemberOverview"
                   type: "object"
                   required:
-                  - "bioguideId"
-                  - "name"
-                  - "partyName"
-                  - "state"
-                  - "terms"
-                  - "updateDate"
+                    - "bioguideId"
+                    - "name"
+                    - "partyName"
+                    - "state"
+                    - "terms"
+                    - "updateDate"
                   properties:
                     bioguideId:
                       $ref: "#/components/schemas/BioguideId"
@@ -232,7 +377,7 @@ components:
                 description: "Pagination object."
                 type: "object"
                 required:
-                - "count"
+                  - "count"
                 properties:
                   count:
                     description: "Total number of records."
@@ -253,11 +398,114 @@ components:
             title: "CongressMemberListErrorResponse"
             type: "object"
             required:
-            - "error"
+              - "error"
             properties:
               error:
                 description: "Error message."
                 type: "string"
+    CongressMemberDetailsResponse:
+      description: "Congress member details."
+      content:
+        application/json:
+          schema:
+            title: "CongressMemberDetailsResponse"
+            type: object
+            required:
+              - "member"
+            properties:
+              member:
+                title: "CongressMemberDetails"
+                type: "object"
+                required:
+                  - "bioguideId"
+                  - "birthYear"
+                  - "currentMember"
+                  - "directOrderName"
+                  - "firstName"
+                  - "invertedOrderName"
+                  - "lastName"
+                  - "officialWebsiteUrl"
+                  - "state"
+                  - "terms"
+                  - "updateDate"
+                properties:
+                  addressInformation:
+                    $ref: "#/components/schemas/AddressInformation"
+                  bioguideId:
+                    $ref: "#/components/schemas/BioguideId"
+                  birthYear:
+                    $ref: "#/components/schemas/BirthYear"
+                  cosponsoredLegislation:
+                    title: "CosponsoredLegislation"
+                    type: "object"
+                    properties:
+                      count:
+                        description: "Total number of cosponsored legislation."
+                        type: "integer"
+                  currentMember:
+                    description: "Is the member currently serving."
+                    type: "boolean"
+                  depiction:
+                    $ref: "#/components/schemas/BioguideDepiction"
+                  directOrderName:
+                    description: "Direct order name."
+                    type: "string"
+                  district:
+                    description: "District number."
+                    type: integer
+                  firstName:
+                    description: "First name."
+                    type: "string"
+                  honorificName:
+                    description: "Honorific name."
+                    type: "string"
+                  invertedOrderName:
+                    description: "Inverted order name."
+                    type: "string"
+                  lastName:
+                    description: "Last name."
+                    type: "string"
+                  middleName:
+                    description: "Middle name."
+                    type: "string"
+                  nickName:
+                    description: "Nick name."
+                    type: "string"
+                  officialWebsiteUrl:
+                    description: "Official website URL."
+                    type: "string"
+                  partyHistory:
+                    $ref: "#/components/schemas/PartyHistory"
+                  sponsoredLegislation:
+                    title: "SponsoredLegislation"
+                    type: "object"
+                    properties:
+                      count:
+                        description: "Total number of sponsored legislation."
+                        type: "integer"
+                  state:
+                    $ref: "#/components/schemas/State"
+                  suffixName:
+                    description: "Suffix name."
+                    type: "string"
+                  terms:
+                    $ref: "#/components/schemas/DetailedTerms"
+                  updateDate:
+                    $ref: "#/components/schemas/UpdateDate"
+    CongressMemberDetailsErrorResponse:
+      description: "Member not found."
+      content:
+        application/json:
+          schema:
+            title: "CongressMemberDetailsErrorResponse"
+            type: "object"
+            required:
+              - "error"
+            properties:
+              error:
+                description: "Error message."
+                type: "string"
+
     RateLimitErrorResponse:
       description: "Rate limit exceeded."
       content:
@@ -266,21 +514,21 @@ components:
             title: "RateLimitErrorResponse"
             type: "object"
             required:
-            - "error"
+              - "error"
             properties:
               error:
                 title: "RateLimitError"
                 description: "Error object."
                 type: "object"
                 required:
-                - "code"
-                - "message"
+                  - "code"
+                  - "message"
                 properties:
                   code:
                     description: "Error code."
                     type: "string"
                     enum:
-                    - "OVER_RATE_LIMIT"
+                      - "OVER_RATE_LIMIT"
                   message:
                     description: "Error message."
                     type: "string"
