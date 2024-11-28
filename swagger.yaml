@@ -9,7 +9,25 @@ info:
 
     This is NOT the official congress.gov YAML and contains modifications.
 
-    Currently only supports 1/100 API operations.
+    Currently only supports 2/100 API operations.
+    Bill API: 0/16
+    Amendments API: 0/8
+    Summaries API: 0/3
+    Congress API: 0/3
+    Member API: 2/8
+    Committee API: 0/10
+    Committee Report API: 0/5
+    Committee Print API: 0/5
+    Committee Meeting API: 0/4
+    Hearing API: 0/4
+    Congressional Record API: 0/1
+    Daily Congressional Record API: 0/4
+    Bound Congressional Record API: 0/4
+    House Communication API: 0/4
+    House Requirement API: 0/3
+    Senate Communication API: 0/4
+    Nomination API: 0/7
+    Treaty API: 0/7
   contact:
     email: "liudotjson@gmail.com"
   license:
