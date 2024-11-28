@@ -17,7 +17,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 ADDITIONAL_PROPERTIES_LIST=(
-  "npmName=@basonjar/congress-gov-sdk"
+  "npmName=congress-gov-sdk"
   "supportsES6=true"
   "withNodeImports=true"
   "apiPackage=congress-gov"
