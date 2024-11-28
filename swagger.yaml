@@ -33,7 +33,7 @@ info:
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-  version: "1.0.6"
+  version: "0.1.2"
 externalDocs:
   description: "Official documentation"
   url: "https://api.congress.gov/"
