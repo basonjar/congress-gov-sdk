@@ -1,5 +1,11 @@
 {
   "name": "congress-gov-sdk",
+  "description": "Axios Typescript SDK for the Congress.gov API",
+  "keywords": ["congress", "gov", "sdk", "api", "axios", "typescript"],
+  "homepage": "https://github.com/basonjar/congress-gov-sdk",
+  "bugs": "https://github.com/basonjar/congress-gov-sdk/issues",
+  "license": "Apache-2.0",
+  "repository": "github:basonjar/congress-gov-sdk",
   "version": "0.1.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
