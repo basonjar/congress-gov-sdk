@@ -10,30 +10,48 @@ info:
     This is NOT the official congress.gov YAML and contains modifications.
 
     Currently only supports 2/100 API operations.
+    
     Bill API: 0/16
+    
     Amendments API: 0/8
+    
     Summaries API: 0/3
+    
     Congress API: 0/3
-    Member API: 2/8
+    
+    Member API: 3/8
+    
     Committee API: 0/10
+    
     Committee Report API: 0/5
+    
     Committee Print API: 0/5
+    
     Committee Meeting API: 0/4
+    
     Hearing API: 0/4
+    
     Congressional Record API: 0/1
+    
     Daily Congressional Record API: 0/4
+    
     Bound Congressional Record API: 0/4
+    
     House Communication API: 0/4
+    
     House Requirement API: 0/3
+    
     Senate Communication API: 0/4
+    
     Nomination API: 0/7
+    
     Treaty API: 0/7
   contact:
     email: "liudotjson@gmail.com"
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-  version: "0.1.2"
+  version: "0.1.3"
 externalDocs:
   description: "Official documentation"
   url: "https://api.congress.gov/"
@@ -80,7 +98,29 @@ paths:
         "403":
           $ref: "#/components/responses/ForbiddenError"
         "404":
-          $ref: "#/components/responses/CongressMemberDetailsErrorResponse"
+          $ref: "#/components/responses/MemberNotFoundErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitErrorResponse"
+  /member/{bioguideId}/sponsored-legislation:
+    get:
+      tags:
+        - "Congress"
+      summary: "Returns a list of legislation sponsored by a congressional member."
+      description: |
+        Get a list of legislation sponsored by a member.
+        Supports query parameters for pagination.
+      operationId: "getMemberSponsoredLegislation"
+      parameters:
+        - $ref: "#/components/parameters/BioguideId"
+        - $ref: "#/components/parameters/Offset"
+        - $ref: "#/components/parameters/LimitMax250"
+      responses:
+        "200":
+          $ref: "#/components/responses/MemberSponsoredLegislationResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/MemberNotFoundErrorResponse"
         "429":
           $ref: "#/components/responses/RateLimitErrorResponse"
 components:
@@ -135,6 +175,55 @@ components:
       schema:
         type: "boolean"
   schemas:
+    Pagination:
+      title: "Pagination"
+      description: "Pagination object."
+      type: "object"
+      required:
+        - "count"
+      properties:
+        count:
+          description: "Total number of records."
+          type: "integer"
+        next:
+          description: "URL of the next page of records."
+          type: "string"
+          format: "uri"
+        prev:
+          description: "URL of the next page of records."
+          type: "string"
+          format: "uri"
+    LegislationOverview:
+      description: "Legislation overview."
+      type: "object"
+      required:
+        - "congress"
+        - "introducedDate"
+        - "number"
+        - "policyArea"
+        - "title"
+        - "type"
+      properties:
+        congress:
+          $ref: "#/components/schemas/CongressNumber"
+        introducedDate:
+          $ref: "#/components/schemas/LegislationIntroducedDate"
+        latestAction:
+          $ref: "#/components/schemas/LegislationLatestAction"
+        number:
+          $ref: "#/components/schemas/LegislationNumber"
+        policyArea:
+          $ref: "#/components/schemas/PolicyArea"
+        title:
+          $ref: "#/components/schemas/LegislationTitle"
+        type:
+          $ref: "#/components/schemas/LegislationType"
+    CongressNumber:
+      description: "Congress number."
+      type: "integer"
+    LegislationNumber:
+      description: "Legislation number."
+      type: "string"
     BioguideId:
       description: "The member's Biographical Directory ID."
       type: "string"
@@ -175,8 +264,7 @@ components:
         chamber:
           $ref: "#/components/schemas/Chamber"
         congress:
-          description: "Congress number."
-          type: "integer"
+          $ref: "#/components/schemas/CongressNumber"
         district:
           description: "District number."
           type: "integer"
@@ -210,8 +298,7 @@ components:
         title: "LeadershipRole"
         properties:
           congress:
-            description: "Congress number."
-            type: "integer"
+            $ref: "#/components/schemas/CongressNumber"
           current:
             description: "Is the member currently serving."
             type: "boolean"
@@ -258,6 +345,41 @@ components:
       type: "string"
       pattern: "^\\d{4}-\\d{2}-\\d{2}T00:00:00Z$"
       format: "date-time"
+    LegislationIntroducedDate:
+      description: "Date the legislation was introduced. Format: YYYY-MM-DD."
+      type: "string"
+      pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+      format: "date"
+    LegislationLatestAction:
+      description: "Latest action on the legislation."
+      type: "object"
+      required:
+        - "actionDate"
+        - "text"
+      properties:
+        actionDate:
+          description: "Date of the action."
+          type: "string"
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          format: "date"
+        text:
+          description: "Action text."
+          type: "string"
+    PolicyArea:
+      description: "Policy area."
+      type: "object"
+      required:
+        - "name"
+      properties:
+        name:
+          description: "Policy area name."
+          type: "string"
+    LegislationTitle:
+      description: "Legislation title."
+      type: "string"
+    LegislationType:
+      description: "Legislation type."
+      type: "string"
     BirthYear:
       description: "Year of birth."
       type: "integer"
@@ -373,23 +495,7 @@ components:
                     updateDate:
                       $ref: "#/components/schemas/UpdateDate"
               pagination:
-                title: "Pagination"
-                description: "Pagination object."
-                type: "object"
-                required:
-                  - "count"
-                properties:
-                  count:
-                    description: "Total number of records."
-                    type: "integer"
-                  next:
-                    description: "URL of the next page of records."
-                    type: "string"
-                    format: "uri"
-                  prev:
-                    description: "URL of the next page of records."
-                    type: "string"
-                    format: "uri"
+                $ref: "#/components/schemas/Pagination"
     CongressMemberListErrorResponse:
       description: "Bad request."
       content:
@@ -492,12 +598,30 @@ components:
                     $ref: "#/components/schemas/DetailedTerms"
                   updateDate:
                     $ref: "#/components/schemas/UpdateDate"
-    CongressMemberDetailsErrorResponse:
+    MemberSponsoredLegislationResponse:
+      description: "Member sponsored legislation."
+      content:
+        application/json:
+          schema:
+            title: "MemberSponsoredLegislationResponse"
+            type: "object"
+            required:
+              - "sponsoredLegislation"
+              - "pagination"
+            properties:
+              sponsoredLegislation:
+                description: "List of sponsored legislation."
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LegislationOverview"
+              pagination:
+                $ref: "#/components/schemas/Pagination"
+    MemberNotFoundErrorResponse:
       description: "Member not found."
       content:
         application/json:
           schema:
-            title: "CongressMemberDetailsErrorResponse"
+            title: "MemberNotFoundErrorResponse"
             type: "object"
             required:
               - "error"
@@ -505,7 +629,6 @@ components:
               error:
                 description: "Error message."
                 type: "string"
-
     RateLimitErrorResponse:
       description: "Rate limit exceeded."
       content:
