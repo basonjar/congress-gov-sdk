@@ -14,7 +14,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "echo \"TODO: Add tests\""
   },
   "dependencies": {
     "axios": "^1.6.0"
