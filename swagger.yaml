@@ -309,7 +309,7 @@ components:
       description: "Terms served."
       type: "object"
       properties:
-        members:
+        item:
           type: "array"
           items:
             $ref: "#/components/schemas/TermItem"
