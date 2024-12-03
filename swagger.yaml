@@ -224,6 +224,9 @@ components:
     LegislationNumber:
       description: "Legislation number."
       type: "string"
+    DistrictNumber:
+      description: "District number."
+      type: integer
     BioguideId:
       description: "The member's Biographical Directory ID."
       type: "string"
@@ -266,8 +269,7 @@ components:
         congress:
           $ref: "#/components/schemas/CongressNumber"
         district:
-          description: "District number."
-          type: "integer"
+          $ref: "#/components/schemas/DistrictNumber"
         endYear:
           $ref: "#/components/schemas/TermEndYear"
         memberType:
@@ -474,6 +476,7 @@ components:
                   type: "object"
                   required:
                     - "bioguideId"
+                    - "district"
                     - "name"
                     - "partyName"
                     - "state"
@@ -484,6 +487,8 @@ components:
                       $ref: "#/components/schemas/BioguideId"
                     depiction:
                       $ref: "#/components/schemas/BioguideDepiction"
+                    district:
+                      $ref: "#/components/schemas/DistrictNumber"
                     name:
                       $ref: "#/components/schemas/Name"
                     partyName:
@@ -557,8 +562,7 @@ components:
                     description: "Direct order name."
                     type: "string"
                   district:
-                    description: "District number."
-                    type: integer
+                    $ref: "#/components/schemas/DistrictNumber"
                   firstName:
                     description: "First name."
                     type: "string"
