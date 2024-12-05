@@ -9,7 +9,7 @@ info:
 
     This is NOT the official congress.gov YAML and contains modifications.
 
-    Currently only supports 2/100 API operations.
+    Currently only supports 4/100 API operations.
     
     Bill API: 0/16
     
@@ -19,7 +19,7 @@ info:
     
     Congress API: 0/3
     
-    Member API: 3/8
+    Member API: 4/8
     
     Committee API: 0/10
     
@@ -117,6 +117,28 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/MemberSponsoredLegislationResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/MemberNotFoundErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitErrorResponse"
+  /member/{bioguideId}/cosponsored-legislation:
+    get:
+      tags:
+        - "Congress"
+      summary: "Returns a list of legislation cosponsored by a congressional member."
+      description: |
+        Get a list of legislation cosponsored by a member.
+        Supports query parameters for pagination.
+      operationId: "getMemberCosponsoredLegislation"
+      parameters:
+        - $ref: "#/components/parameters/BioguideId"
+        - $ref: "#/components/parameters/Offset"
+        - $ref: "#/components/parameters/LimitMax250"
+      responses:
+        "200":
+          $ref: "#/components/responses/MemberCosponsoredLegislationResponse"
         "403":
           $ref: "#/components/responses/ForbiddenError"
         "404":
@@ -622,6 +644,24 @@ components:
             properties:
               sponsoredLegislation:
                 description: "List of sponsored legislation."
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LegislationOverview"
+              pagination:
+                $ref: "#/components/schemas/Pagination"
+    MemberCosponsoredLegislationResponse:
+      description: "Member cosponsored legislation."
+      content:
+        application/json:
+          schema:
+            title: "MemberCosponsoredLegislationResponse"
+            type: "object"
+            required:
+              - "cosponsoredLegislation"
+              - "pagination"
+            properties:
+              cosponsoredLegislation:
+                description: "List of cosponsored legislation."
                 type: "array"
                 items:
                   $ref: "#/components/schemas/LegislationOverview"
