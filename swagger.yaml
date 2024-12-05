@@ -575,6 +575,8 @@ components:
                   lastName:
                     description: "Last name."
                     type: "string"
+                  leadership:
+                    $ref: "#/components/schemas/LeadershipRoles"
                   middleName:
                     description: "Middle name."
                     type: "string"
