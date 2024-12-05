@@ -1,6 +1,6 @@
 import {
     Configuration,
-    CongressApi, CongressMemberDetailsResponse,
+    CongressApi, CongressApiGetMemberSponsoredLegislationRequest, CongressMemberDetailsResponse,
     CongressMemberListErrorResponse,
     ForbiddenErrorCodeEnum,
     ForbiddenErrorResponse, MemberNotFoundErrorResponse, RateLimitErrorCodeEnum, RateLimitErrorResponse
@@ -62,6 +62,25 @@ const missingKeyTest = () => it("should handle 403 missing key errors when fetch
     expect.assertions(3);
 });
 
+const memberNotFoundTest = () => it("should handle 404 errors when fetching member details", async () => {
+    mockedAxios.onGet().reply(404, {
+        "error": "Not found"
+    });
+
+    try {
+        await api.getMemberDetails({bioguideId: "A000000"});
+    } catch (e) {
+        const error = e as AxiosError;
+        expect(error.message).toBe("Request failed with status code 404");
+        expect(error.response).toBeDefined();
+        expect(error.response!.status).toBe(404);
+        expect(error.response!.data).toBeDefined();
+        const errorResponse = error.response!.data as MemberNotFoundErrorResponse;
+        expect(errorResponse.error).toBe("Not found");
+    }
+    expect.assertions(5);
+});
+
 const rateLimitTest = () => it("should handle 429 rate limit errors when fetching members", async () => {
     mockedAxios.onGet().reply(429, {
         "error": {
@@ -81,6 +100,97 @@ const rateLimitTest = () => it("should handle 429 rate limit errors when fetchin
     }
     expect.assertions(3);
 
+});
+
+describe("CongressApi - getMemberSponsoredLegislation", () => {
+    beforeEach(() => {
+        mockedAxios.reset();
+        jest.clearAllMocks()
+    });
+
+    it("should fetch member sponsored legislation successfully", async () => {
+        const mockResponse = {
+            sponsoredLegislation: [
+                {
+                    congress: 115,
+                    introducedDate: "2017-01-01",
+                    latestAction: {
+                        actionDate: "2017-01-01",
+                        actionTime: "12:00:00",
+                        text: "Motion to reconsider laid on the table Agreed to without objection."
+                    },
+                    number: "1125",
+                    policyArea: {
+                        name: "Congress"
+                    },
+                    title: "Legislation title",
+                    type: "hres"
+                }
+            ],
+            pagination: {
+                count: 2,
+                next: "https://api.congress.gov/v3/member/A000000/sponsored-legislation?offset=1",
+            }
+        };
+
+        mockedAxios.onGet(/\/v3\/member\/A000000\/sponsored-legislation(\?.*)?$/).reply(200, mockResponse);
+
+        const response = await api.getMemberSponsoredLegislation({bioguideId: "A000000"});
+        const data = response.data;
+
+        expect(data).toBeDefined();
+        expect(data.sponsoredLegislation).toBeDefined();
+        expect(data.sponsoredLegislation.length).toBe(1);
+        expect(data.sponsoredLegislation[0].congress).toBe(115);
+        expect(data.sponsoredLegislation[0].introducedDate).toBe("2017-01-01");
+        expect(data.sponsoredLegislation[0].latestAction).toBeDefined();
+        expect(data.sponsoredLegislation[0].latestAction!.actionDate).toBe("2017-01-01");
+        expect(data.sponsoredLegislation[0].latestAction!.actionTime).toBe("12:00:00");
+        expect(data.sponsoredLegislation[0].latestAction!.text).toBe("Motion to reconsider laid on the table Agreed to without objection.");
+        expect(data.sponsoredLegislation[0].number).toBe("1125");
+        expect(data.sponsoredLegislation[0].policyArea).toBeDefined();
+        expect(data.sponsoredLegislation[0].policyArea!.name).toBe("Congress");
+        expect(data.sponsoredLegislation[0].title).toBe("Legislation title");
+        expect(data.sponsoredLegislation[0].type).toBe("hres");
+        expect(data.pagination).toBeDefined();
+        expect(data.pagination.count).toBe(2);
+        expect(data.pagination.next).toBe("https://api.congress.gov/v3/member/A000000/sponsored-legislation?offset=1");
+        expect(data.pagination.prev).toBeUndefined();
+        expect(mockedAxios.history.length).toBe(1);
+    });
+
+    it("should fetch member sponsored legislation with all optional parameters", async () => {
+        const mockResponse = {
+            sponsoredLegislation: [],
+            pagination: {
+                count: 0
+            }
+        }
+
+        mockedAxios.onGet().reply(200, mockResponse);
+
+        const params: CongressApiGetMemberSponsoredLegislationRequest = {
+            bioguideId: "A00000",
+            offset: 10,
+            limit: 50
+        }
+
+        await api.getMemberSponsoredLegislation(params);
+
+        expect(mockedAxios.history.length).toBe(1);
+        const request = mockedAxios.history[0];
+        expect(request.data).toBeUndefined();
+        expect(request.url).toContain("api_key=test-api-key");
+        expect(request.url).toContain("offset=10");
+        expect(request.url).toContain("limit=50");
+    });
+
+   describe("Error Handling", () => {
+       invalidKeyTest();
+       missingKeyTest();
+       memberNotFoundTest();
+       rateLimitTest();
+   });
 });
 
 describe("CongressApi - getMemberDetails", () => {
@@ -217,26 +327,7 @@ describe("CongressApi - getMemberDetails", () => {
     describe("Error Handling", () => {
         invalidKeyTest();
         missingKeyTest();
-
-        it("should handle 404 errors when fetching member details", async () => {
-            mockedAxios.onGet().reply(404, {
-                "error": "Not found"
-            });
-
-            try {
-                await api.getMemberDetails({bioguideId: "A000000"});
-            } catch (e) {
-                const error = e as AxiosError;
-                expect(error.message).toBe("Request failed with status code 404");
-                expect(error.response).toBeDefined();
-                expect(error.response!.status).toBe(404);
-                expect(error.response!.data).toBeDefined();
-                const errorResponse = error.response!.data as MemberNotFoundErrorResponse;
-                expect(errorResponse.error).toBe("Not found");
-            }
-            expect.assertions(5);
-        });
-
+        memberNotFoundTest();
         rateLimitTest();
     });
 });
