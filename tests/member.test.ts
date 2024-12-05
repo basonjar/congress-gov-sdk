@@ -1,9 +1,15 @@
 import {
     Configuration,
-    CongressApi, CongressApiGetMemberSponsoredLegislationRequest, CongressMemberDetailsResponse,
+    CongressApi,
+    CongressApiGetMemberCosponsoredLegislationRequest,
+    CongressApiGetMemberSponsoredLegislationRequest,
+    CongressMemberDetailsResponse,
     CongressMemberListErrorResponse,
     ForbiddenErrorCodeEnum,
-    ForbiddenErrorResponse, MemberNotFoundErrorResponse, RateLimitErrorCodeEnum, RateLimitErrorResponse
+    ForbiddenErrorResponse,
+    MemberNotFoundErrorResponse,
+    RateLimitErrorCodeEnum,
+    RateLimitErrorResponse
 } from "../dist";
 import {
     CongressApiGetMembersRequest,
@@ -191,6 +197,97 @@ describe("CongressApi - getMemberSponsoredLegislation", () => {
        memberNotFoundTest();
        rateLimitTest();
    });
+});
+
+describe("CongressApi - getMemberCosponsoredLegislation", () => {
+    beforeEach(() => {
+        mockedAxios.reset();
+        jest.clearAllMocks()
+    });
+
+    it("should fetch member cosponsored legislation successfully", async () => {
+        const mockResponse = {
+            cosponsoredLegislation: [
+                {
+                    congress: 115,
+                    introducedDate: "2017-01-01",
+                    latestAction: {
+                        actionDate: "2017-01-01",
+                        actionTime: "12:00:00",
+                        text: "Motion to reconsider laid on the table Agreed to without objection."
+                    },
+                    number: "1125",
+                    policyArea: {
+                        name: "Congress"
+                    },
+                    title: "Legislation title",
+                    type: "hres"
+                }
+            ],
+            pagination: {
+                count: 2,
+                next: "https://api.congress.gov/v3/member/A000000/cosponsored-legislation?offset=1",
+            }
+        };
+
+        mockedAxios.onGet(/\/v3\/member\/A000000\/cosponsored-legislation(\?.*)?$/).reply(200, mockResponse);
+
+        const response = await api.getMemberCosponsoredLegislation({bioguideId: "A000000"});
+        const data = response.data;
+
+        expect(data).toBeDefined();
+        expect(data.cosponsoredLegislation).toBeDefined();
+        expect(data.cosponsoredLegislation.length).toBe(1);
+        expect(data.cosponsoredLegislation[0].congress).toBe(115);
+        expect(data.cosponsoredLegislation[0].introducedDate).toBe("2017-01-01");
+        expect(data.cosponsoredLegislation[0].latestAction).toBeDefined();
+        expect(data.cosponsoredLegislation[0].latestAction!.actionDate).toBe("2017-01-01");
+        expect(data.cosponsoredLegislation[0].latestAction!.actionTime).toBe("12:00:00");
+        expect(data.cosponsoredLegislation[0].latestAction!.text).toBe("Motion to reconsider laid on the table Agreed to without objection.");
+        expect(data.cosponsoredLegislation[0].number).toBe("1125");
+        expect(data.cosponsoredLegislation[0].policyArea).toBeDefined();
+        expect(data.cosponsoredLegislation[0].policyArea!.name).toBe("Congress");
+        expect(data.cosponsoredLegislation[0].title).toBe("Legislation title");
+        expect(data.cosponsoredLegislation[0].type).toBe("hres");
+        expect(data.pagination).toBeDefined();
+        expect(data.pagination.count).toBe(2);
+        expect(data.pagination.next).toBe("https://api.congress.gov/v3/member/A000000/cosponsored-legislation?offset=1");
+        expect(data.pagination.prev).toBeUndefined();
+        expect(mockedAxios.history.length).toBe(1);
+    });
+
+    it("should fetch member cosponsored legislation with all optional parameters", async () => {
+        const mockResponse = {
+            cosponsoredLegislation: [],
+            pagination: {
+                count: 0
+            }
+        }
+
+        mockedAxios.onGet().reply(200, mockResponse);
+
+        const params: CongressApiGetMemberCosponsoredLegislationRequest = {
+            bioguideId: "A00000",
+            offset: 10,
+            limit: 50
+        }
+
+        await api.getMemberCosponsoredLegislation(params);
+
+        expect(mockedAxios.history.length).toBe(1);
+        const request = mockedAxios.history[0];
+        expect(request.data).toBeUndefined();
+        expect(request.url).toContain("api_key=test-api-key");
+        expect(request.url).toContain("offset=10");
+        expect(request.url).toContain("limit=50");
+    });
+
+    describe("Error Handling", () => {
+        invalidKeyTest();
+        missingKeyTest();
+        memberNotFoundTest();
+        rateLimitTest();
+    });
 });
 
 describe("CongressApi - getMemberDetails", () => {
