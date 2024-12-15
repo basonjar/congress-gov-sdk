@@ -571,6 +571,7 @@ components:
                   - "invertedOrderName"
                   - "lastName"
                   - "officialWebsiteUrl"
+                  - "partyHistory"
                   - "state"
                   - "terms"
                   - "updateDate"
