@@ -290,7 +290,7 @@ components:
         - "congress"
         - "district"
         - "memberType"
-        - "startyear"
+        - "startYear"
         - "stateCode"
         - "stateName"
       properties:
