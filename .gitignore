@@ -4,4 +4,5 @@ typings
 dist
 src/*
 !src/*.ts
-.openapi-generator
+.openapi-generator/
+openapitools.json
