@@ -32,7 +32,6 @@ openapi-generator-cli generate \
   -i swagger.yaml \
   -t templates \
   -g typescript-axios \
-  -o ./src \
   --additional-properties="$ADDITIONAL_PROPERTIES"
 
 echo "SDK generation complete with properties: $ADDITIONAL_PROPERTIES"
