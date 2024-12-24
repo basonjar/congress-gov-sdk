@@ -1,6 +1,6 @@
 {
   "name": "congress-gov-sdk",
-  "version": "0.1.7-SNAPSHOT.202412241650",
+  "version": "{{npmVersion}}",
   "description": "Axios Typescript SDK for the Congress.gov API",
   "keywords": [
     "congress",
@@ -12,21 +12,23 @@
   ],
   "homepage": "https://github.com/basonjar/congress-gov-sdk",
   "bugs": "https://github.com/basonjar/congress-gov-sdk/issues",
-  "license": "Apache-2.0",
+  "license": "{{licenseName}}",
   "repository": "github:basonjar/congress-gov-sdk",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
+{{#supportsES6}}
   "module": "./dist/esm/index.js",
   "sideEffects": false,
+{{/supportsES6}}
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.esm.json",
+    "build": "tsc{{#supportsES6}} && tsc -p tsconfig.esm.json{{/supportsES6}}",
     "prepare": "npm run build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "axios": "^1.6.1"
+    "axios": "{{axiosVersion}}"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
