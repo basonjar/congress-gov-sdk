@@ -22,8 +22,7 @@ Add the API key to your env:
 Usage:
 
 ```ts
-import { Configuration, CongressApi } from "congress-gov-sdk";
-import { CongressMemberOverview } from "./api";
+import { Configuration, CongressApi, CongressMemberOverview } from "congress-gov-sdk";
 
 const congressApi = new CongressApi(new Configuration({
     apiKey: process.env.CONGRESS_GOV_API_KEY
