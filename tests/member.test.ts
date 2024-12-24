@@ -3,23 +3,24 @@ import {
     CongressApi,
     CongressApiGetMemberCosponsoredLegislationRequest,
     CongressApiGetMemberSponsoredLegislationRequest,
+    CongressMemberListResponse,
+    Chamber,
+    CongressApiGetMembersRequest,
     CongressMemberDetailsResponse,
     CongressMemberListErrorResponse,
     ForbiddenErrorCodeEnum,
     ForbiddenErrorResponse,
+    MemberCosponsoredLegislationResponse,
     MemberNotFoundErrorResponse,
+    MemberSponsoredLegislationResponse,
     RateLimitErrorCodeEnum,
     RateLimitErrorResponse
 } from "../dist";
-import {
-    CongressApiGetMembersRequest,
-    CongressMemberListResponse,
-    Chamber
-} from "../dist";
+
 import MockAdapter from "axios-mock-adapter";
 import globalAxios, {AxiosError} from "axios";
 
-const mockedAxios: MockAdapter = new MockAdapter(globalAxios);
+const mockedAxios = new MockAdapter(globalAxios);
 const config = new Configuration({
     apiKey: "test-api-key"
 });
@@ -166,12 +167,12 @@ describe("CongressApi - getMemberSponsoredLegislation", () => {
     });
 
     it("should fetch member sponsored legislation with all optional parameters", async () => {
-        const mockResponse = {
+        const mockResponse: MemberSponsoredLegislationResponse = {
             sponsoredLegislation: [],
             pagination: {
                 count: 0
             }
-        }
+        };
 
         mockedAxios.onGet().reply(200, mockResponse);
 
@@ -257,7 +258,7 @@ describe("CongressApi - getMemberCosponsoredLegislation", () => {
     });
 
     it("should fetch member cosponsored legislation with all optional parameters", async () => {
-        const mockResponse = {
+        const mockResponse: MemberCosponsoredLegislationResponse = {
             cosponsoredLegislation: [],
             pagination: {
                 count: 0
@@ -505,7 +506,7 @@ describe("CongressApi - getMembers", () => {
     });
 
     it("should fetch members with all optional parameters", async () => {
-        const mockResponse = {
+        const mockResponse: CongressMemberListResponse = {
             members: [],
             pagination: {
                 count: 0
