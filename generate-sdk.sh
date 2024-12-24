@@ -28,8 +28,9 @@ ADDITIONAL_PROPERTIES_LIST=(
 ADDITIONAL_PROPERTIES=$(IFS=,; echo "${ADDITIONAL_PROPERTIES_LIST[*]}")
 
 
-npx @openapitools/openapi-generator-cli generate \
+openapi-generator-cli generate \
   -i swagger.yaml \
+  -t templates \
   -g typescript-axios \
   -o ./src \
   --additional-properties="$ADDITIONAL_PROPERTIES"
