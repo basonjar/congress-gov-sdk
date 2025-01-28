@@ -41,7 +41,7 @@ const members: CongressMemberOverview[] = response.data.members;
 ```
 
 ## Features
-Currently only supports 4 of the 100 available APIs
+Currently only supports 5 of the 100 available APIs
 
 Bill API: 0/16
 
@@ -51,7 +51,7 @@ Summaries API: 0/3
 
 Congress API: 0/3
 
-Member API: 4/8
+Member API: 5/8
 
 Committee API: 0/10
 

@@ -11,10 +11,11 @@ import {
     ForbiddenErrorCodeEnum,
     ForbiddenErrorResponse,
     MemberCosponsoredLegislationResponse,
-    MemberNotFoundErrorResponse,
+    ResourceNotFoundErrorResponse,
     MemberSponsoredLegislationResponse,
     RateLimitErrorCodeEnum,
-    RateLimitErrorResponse
+    RateLimitErrorResponse,
+    CongressApiGetMembersByStateAndDistrictRequest
 } from "../dist";
 
 import MockAdapter from "axios-mock-adapter";
@@ -26,7 +27,7 @@ const config = new Configuration({
 });
 const api = new CongressApi(config);
 
-const invalidKeyTest = () => it("should handle 403 invalid key errors when fetching members", async () => {
+const invalidKeyTest = (apiMethod: () => Promise<any>) => it("should handle 403 invalid key errors", async () => {
     mockedAxios.onGet().reply(403, {
         "error": {
             "code": "API_KEY_INVALID",
@@ -35,7 +36,7 @@ const invalidKeyTest = () => it("should handle 403 invalid key errors when fetch
     });
 
     try {
-        await api.getMembers();
+        await apiMethod();
     } catch (e) {
         const error = e as AxiosError;
         expect(error.message).toBe("Request failed with status code 403");
@@ -50,7 +51,7 @@ const invalidKeyTest = () => it("should handle 403 invalid key errors when fetch
     expect.assertions(7);
 });
 
-const missingKeyTest = () => it("should handle 403 missing key errors when fetching members", async () => {
+const missingKeyTest = (apiMethod: () => Promise<any>) => it("should handle 403 missing key errors", async () => {
     mockedAxios.onGet().reply(403, {
         "error": {
             "code": "API_KEY_MISSING",
@@ -58,7 +59,7 @@ const missingKeyTest = () => it("should handle 403 missing key errors when fetch
         }
     });
     try {
-        await api.getMembers();
+        await apiMethod();
     } catch (e) {
         const error = e as AxiosError;
         const errorResponse = error.response!.data as ForbiddenErrorResponse;
@@ -69,26 +70,26 @@ const missingKeyTest = () => it("should handle 403 missing key errors when fetch
     expect.assertions(3);
 });
 
-const memberNotFoundTest = () => it("should handle 404 errors when fetching member details", async () => {
+const resourceNotFoundTest = (apiMethod: () => Promise<any>) => it("should handle 404 errors", async () => {
     mockedAxios.onGet().reply(404, {
         "error": "Not found"
     });
 
     try {
-        await api.getMemberDetails({bioguideId: "A000000"});
+        await apiMethod();
     } catch (e) {
         const error = e as AxiosError;
         expect(error.message).toBe("Request failed with status code 404");
         expect(error.response).toBeDefined();
         expect(error.response!.status).toBe(404);
         expect(error.response!.data).toBeDefined();
-        const errorResponse = error.response!.data as MemberNotFoundErrorResponse;
+        const errorResponse = error.response!.data as ResourceNotFoundErrorResponse;
         expect(errorResponse.error).toBe("Not found");
     }
     expect.assertions(5);
 });
 
-const rateLimitTest = () => it("should handle 429 rate limit errors when fetching members", async () => {
+const rateLimitTest = (apiMethod: () => Promise<any>) => it("should handle 429 rate limit errors", async () => {
     mockedAxios.onGet().reply(429, {
         "error": {
             "code": "OVER_RATE_LIMIT",
@@ -97,7 +98,7 @@ const rateLimitTest = () => it("should handle 429 rate limit errors when fetchin
     });
 
     try {
-        await api.getMembers();
+        await apiMethod();
     } catch (e) {
         const error = e as AxiosError;
         const errorResponse = error.response!.data as RateLimitErrorResponse;
@@ -106,7 +107,6 @@ const rateLimitTest = () => it("should handle 429 rate limit errors when fetchin
         expect(errorResponse.error.message).toBe("Rate limit exceeded");
     }
     expect.assertions(3);
-
 });
 
 describe("CongressApi - getMemberSponsoredLegislation", () => {
@@ -193,10 +193,10 @@ describe("CongressApi - getMemberSponsoredLegislation", () => {
     });
 
    describe("Error Handling", () => {
-       invalidKeyTest();
-       missingKeyTest();
-       memberNotFoundTest();
-       rateLimitTest();
+       invalidKeyTest(() => api.getMemberSponsoredLegislation({bioguideId: "A000000"}));
+       missingKeyTest(() => api.getMemberSponsoredLegislation({bioguideId: "A000000"}));
+       resourceNotFoundTest(() => api.getMemberSponsoredLegislation({bioguideId: "A000000"}));
+       rateLimitTest(() => api.getMemberSponsoredLegislation({bioguideId: "A000000"}));
    });
 });
 
@@ -284,10 +284,10 @@ describe("CongressApi - getMemberCosponsoredLegislation", () => {
     });
 
     describe("Error Handling", () => {
-        invalidKeyTest();
-        missingKeyTest();
-        memberNotFoundTest();
-        rateLimitTest();
+        invalidKeyTest(() => api.getMemberCosponsoredLegislation({bioguideId: "A000000"}));
+        missingKeyTest(() => api.getMemberCosponsoredLegislation({bioguideId: "A000000"}));
+        resourceNotFoundTest(() => api.getMemberCosponsoredLegislation({bioguideId: "A000000"}));
+        rateLimitTest(() => api.getMemberCosponsoredLegislation({bioguideId: "A000000"}));
     });
 });
 
@@ -423,10 +423,10 @@ describe("CongressApi - getMemberDetails", () => {
     });
 
     describe("Error Handling", () => {
-        invalidKeyTest();
-        missingKeyTest();
-        memberNotFoundTest();
-        rateLimitTest();
+        invalidKeyTest(() => api.getMemberDetails({bioguideId: "A000000"}));
+        missingKeyTest(() => api.getMemberDetails({bioguideId: "A000000"}));
+        resourceNotFoundTest(() => api.getMemberDetails({bioguideId: "A000000"}));
+        rateLimitTest(() => api.getMemberDetails({bioguideId: "A000000"}));
     });
 });
 
@@ -556,8 +556,143 @@ describe("CongressApi - getMembers", () => {
             expect.assertions(5);
         });
 
-        invalidKeyTest();
-        missingKeyTest();
-        rateLimitTest();
+        invalidKeyTest(() => api.getMembers());
+        missingKeyTest(() => api.getMembers());
+        rateLimitTest(() => api.getMembers());
+    });
+});
+
+describe("CongressApi - getMembersByStateAndDistrict", () => {
+
+    beforeEach(() => {
+        mockedAxios.reset();
+        jest.clearAllMocks();
+    });
+
+    it("should fetch members successfully with default parameters", async () => {
+        const mockResponse = {
+            members: [
+                {
+                    bioguideId: "A000000",
+                    depiction: {
+                        "attribution": "Image courtesy of the Member",
+                        "imageUrl": "https://www.congress.gov/img/member/6734b6724c72e343a6aff9e6_200.jpg"
+                    },
+                    "district": 1,
+                    name: "John Doe",
+                    partyName: "Democrat",
+                    state: "California",
+                    terms: {
+                        item: [
+                            {
+                                chamber: "House of Representatives",
+                                startYear: 2020,
+                                endYear: 2022
+                            }
+                        ]
+                    },
+                    updateDate: "2024-01-01T00:00:00Z"
+                }
+            ],
+            pagination: {
+                count: 1
+            }
+        };
+
+        mockedAxios.onGet(/\/v3\/member\/CA\/1(\?.*)?$/).reply(200, mockResponse);
+
+        const response = await api.getMembersByStateAndDistrict({stateCode: "CA", district: "1"});
+        const data: CongressMemberListResponse = response.data;
+
+        expect(data).toBeDefined();
+        expect(data.members).toBeDefined();
+        expect(data.members.length).toBe(1);
+        expect(data.members[0].bioguideId).toBe("A000000");
+        expect(data.members[0].depiction).toBeDefined();
+        expect(data.members[0].depiction!.attribution).toBe("Image courtesy of the Member");
+        expect(data.members[0].depiction!.imageUrl).toBe("https://www.congress.gov/img/member/6734b6724c72e343a6aff9e6_200.jpg");
+        expect(data.members[0].district).toBe(1);
+        expect(data.members[0].name).toBe("John Doe");
+        expect(data.members[0].partyName).toBe("Democrat");
+        expect(data.members[0].state).toBe("California");
+        expect(data.members[0].terms).toBeDefined();
+        expect(data.members[0].terms.item).toBeDefined();
+        expect(data.members[0].terms.item!.length).toBe(1);
+        expect(data.members[0].terms.item![0].chamber).toBe(Chamber.HouseOfRepresentatives);
+        expect(data.members[0].terms.item![0].startYear).toBe(2020);
+        expect(data.members[0].terms.item![0].endYear).toBe(2022);
+        expect(data.members[0].updateDate).toBe("2024-01-01T00:00:00Z");
+        expect(data.pagination.count).toBe(1);
+        expect(data.pagination.next).toBeUndefined();
+        expect(data.pagination.prev).toBeUndefined();
+
+        expect(mockedAxios.history.length).toBe(1);
+        const request = mockedAxios.history[0];
+        expect(request.data).toBeUndefined();
+        expect(request.url).toContain("?api_key=test-api-key");
+        expect(request.url).not.toContain("offset");
+        expect(request.url).not.toContain("limit");
+        expect(request.url).not.toContain("fromDateTime");
+        expect(request.url).not.toContain("toDateTime");
+        expect(request.url).not.toContain("currentMember");
+    });
+
+    it("should fetch members with all optional parameters", async () => {
+        const mockResponse: CongressMemberListResponse = {
+            members: [],
+            pagination: {
+                count: 0
+            }
+        };
+
+        mockedAxios.onGet().reply(200, mockResponse);
+
+        const params: CongressApiGetMembersByStateAndDistrictRequest = {
+            stateCode: "CA",
+            district: "1",
+            offset: 0,
+            limit: 250,
+            fromDateTime: "2024-01-01T00:00:00Z",
+            toDateTime: "2024-12-31T00:00:00Z",
+            currentMember: true
+        };
+
+        await api.getMembersByStateAndDistrict(params);
+
+        expect(mockedAxios.history.length).toBe(1);
+        const request = mockedAxios.history[0];
+        expect(request.data).toBeUndefined();
+        expect(request.url).toContain("api_key=test-api-key");
+        expect(request.url).toContain("offset=0");
+        expect(request.url).toContain("limit=250");
+        expect(decodeURIComponent(request.url!)).toContain("fromDateTime=2024-01-01T00:00:00Z");
+        expect(decodeURIComponent(request.url!)).toContain("toDateTime=2024-12-31T00:00:00Z");
+        expect(request.url).toContain("currentMember=true");
+    });
+
+    describe("Error Handling", () => {
+        it("should handle 400 errors when fetching members by state code and district", async () => {
+            mockedAxios.onGet().reply(400, {
+                "error": "Bad request"
+            });
+
+            try {
+                await api.getMembersByStateAndDistrict({stateCode: "CA", district: "1"});
+            } catch (e) {
+                const error = e as AxiosError;
+                expect(error.message).toBe("Request failed with status code 400");
+                expect(error.response).toBeDefined();
+                expect(error.response!.status).toBe(400);
+                expect(error.response!.data).toBeDefined();
+                const errorResponse = error.response!.data as CongressMemberListErrorResponse;
+                expect(errorResponse.error).toBe("Bad request");
+            }
+            expect.assertions(5);
+        });
+
+        invalidKeyTest(() => api.getMembersByStateAndDistrict({stateCode: "CA", district: "1"}));
+        missingKeyTest(() => api.getMembersByStateAndDistrict({stateCode: "CA", district: "1"}));
+        resourceNotFoundTest(() => api.getMembersByStateAndDistrict({stateCode: "CAA", district: "1"}));
+        rateLimitTest(() => api.getMembersByStateAndDistrict({stateCode: "CA", district: "1"}));
     });
 });

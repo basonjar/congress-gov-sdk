@@ -9,7 +9,7 @@ info:
 
     This is NOT the official congress.gov YAML and contains modifications.
 
-    Currently only supports 4/100 API operations.
+    Currently only supports 5/100 API operations.
     
     Bill API: 0/16
     
@@ -19,7 +19,7 @@ info:
     
     Congress API: 0/3
     
-    Member API: 4/8
+    Member API: 5/8
     
     Committee API: 0/10
     
@@ -51,7 +51,7 @@ info:
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-  version: "0.1.6"
+  version: "0.1.7"
 externalDocs:
   description: "Official documentation"
   url: "https://api.congress.gov/"
@@ -98,7 +98,7 @@ paths:
         "403":
           $ref: "#/components/responses/ForbiddenError"
         "404":
-          $ref: "#/components/responses/MemberNotFoundErrorResponse"
+          $ref: "#/components/responses/ResourceNotFoundErrorResponse"
         "429":
           $ref: "#/components/responses/RateLimitErrorResponse"
   /member/{bioguideId}/sponsored-legislation:
@@ -120,7 +120,7 @@ paths:
         "403":
           $ref: "#/components/responses/ForbiddenError"
         "404":
-          $ref: "#/components/responses/MemberNotFoundErrorResponse"
+          $ref: "#/components/responses/ResourceNotFoundErrorResponse"
         "429":
           $ref: "#/components/responses/RateLimitErrorResponse"
   /member/{bioguideId}/cosponsored-legislation:
@@ -142,7 +142,48 @@ paths:
         "403":
           $ref: "#/components/responses/ForbiddenError"
         "404":
-          $ref: "#/components/responses/MemberNotFoundErrorResponse"
+          $ref: "#/components/responses/ResourceNotFoundErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitErrorResponse"
+  /member/{stateCode}/{district}:
+    get:
+      tags:
+        - "Congress"
+      summary: "Returns a list of congressional members by state code and district."
+      description: |
+        Get congress member list by state code and district.
+        Supports query parameters for filtering.
+      operationId: "getMembersByStateAndDistrict"
+      parameters:
+        - $ref: "#/components/parameters/Offset"
+        - $ref: "#/components/parameters/LimitMax250"
+        - $ref: "#/components/parameters/FromDateTimeUpdateDate"
+        - $ref: "#/components/parameters/ToDateTimeUpdateDate"
+        - $ref: "#/components/parameters/CurrentMember"
+        - name: "stateCode"
+          in: "path"
+          required: true
+          description: "The member's state code (pattern: ^[A-Z]{2}$)."
+          schema:
+            $ref: "#/components/schemas/StateCode"
+        - name: "district"
+          in: "path"
+          required: true
+          description: "The member's district number (pattern: ^\\d{2}$)."
+          schema:
+            type: "string"
+            pattern: "^\\d{2}$"
+            minLength: 2
+            maxLength: 2
+      responses:
+        "200":
+          $ref: "#/components/responses/CongressMemberListResponse"
+        "400":
+          $ref: "#/components/responses/CongressMemberListErrorResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/ResourceNotFoundErrorResponse"
         "429":
           $ref: "#/components/responses/RateLimitErrorResponse"
 components:
@@ -676,12 +717,12 @@ components:
                   $ref: "#/components/schemas/LegislationOverview"
               pagination:
                 $ref: "#/components/schemas/Pagination"
-    MemberNotFoundErrorResponse:
-      description: "Member not found."
+    ResourceNotFoundErrorResponse:
+      description: "Resource not found."
       content:
         application/json:
           schema:
-            title: "MemberNotFoundErrorResponse"
+            title: "ResourceNotFoundErrorResponse"
             type: "object"
             required:
               - "error"
