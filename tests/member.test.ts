@@ -11,7 +11,7 @@ import {
     ForbiddenErrorCodeEnum,
     ForbiddenErrorResponse,
     MemberCosponsoredLegislationResponse,
-    MemberNotFoundErrorResponse,
+    ResourceNotFoundErrorResponse,
     MemberSponsoredLegislationResponse,
     RateLimitErrorCodeEnum,
     RateLimitErrorResponse
@@ -82,7 +82,7 @@ const memberNotFoundTest = () => it("should handle 404 errors when fetching memb
         expect(error.response).toBeDefined();
         expect(error.response!.status).toBe(404);
         expect(error.response!.data).toBeDefined();
-        const errorResponse = error.response!.data as MemberNotFoundErrorResponse;
+        const errorResponse = error.response!.data as ResourceNotFoundErrorResponse;
         expect(errorResponse.error).toBe("Not found");
     }
     expect.assertions(5);
