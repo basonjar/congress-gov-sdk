@@ -160,21 +160,8 @@ paths:
         - $ref: "#/components/parameters/FromDateTimeUpdateDate"
         - $ref: "#/components/parameters/ToDateTimeUpdateDate"
         - $ref: "#/components/parameters/CurrentMember"
-        - name: "stateCode"
-          in: "path"
-          required: true
-          description: "The member's state code (pattern: ^[A-Z]{2}$)."
-          schema:
-            $ref: "#/components/schemas/StateCode"
-        - name: "district"
-          in: "path"
-          required: true
-          description: "The member's district number (pattern: ^\\d{2}$)."
-          schema:
-            type: "string"
-            pattern: "^\\d{2}$"
-            minLength: 2
-            maxLength: 2
+        - $ref: "#/components/parameters/MemberStateCode"
+        - $ref: "#/components/parameters/MemberDistrictNumber"
       responses:
         "200":
           $ref: "#/components/responses/CongressMemberListResponse"
@@ -237,6 +224,23 @@ components:
       required: false
       schema:
         type: "boolean"
+    MemberStateCode:
+      name: "stateCode"
+      in: "path"
+      required: true
+      description: "The member's state code (pattern: ^[A-Z]{2}$)."
+      schema:
+        $ref: "#/components/schemas/StateCode"
+    MemberDistrictNumber:
+      name: "district"
+      in: "path"
+      required: true
+      description: "The member's district number (pattern: ^\\d{2}$)."
+      schema:
+        type: "string"
+        pattern: "^\\d{2}$"
+        minLength: 2
+        maxLength: 2
   schemas:
     Pagination:
       title: "Pagination"

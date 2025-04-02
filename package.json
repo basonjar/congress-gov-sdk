@@ -1,6 +1,6 @@
 {
   "name": "congress-gov-sdk",
-  "version": "0.1.7",
+  "version": "0.1.7-SNAPSHOT.202504012332",
   "description": "Axios Typescript SDK for the Congress.gov API",
   "keywords": [
     "congress",
