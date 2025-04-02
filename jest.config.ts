@@ -5,6 +5,6 @@ module.exports = {
     "^.+\\.tsx?$": ["ts-jest", {}],
   },
   moduleNameMapper: {
-    '^../dist$': '<rootDir>/src'
-  }
+    "^../dist$": "<rootDir>/src",
+  },
 };

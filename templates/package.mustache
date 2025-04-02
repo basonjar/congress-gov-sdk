@@ -25,7 +25,8 @@
     "prepare": "npm run build",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\""
   },
   "dependencies": {
     "axios": "{{axiosVersion}}"
@@ -39,11 +40,11 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.0.0",
     "husky": "^9.1.7",
+    "prettier": "^3.5.1",
     "lint-staged": "^13.2.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
       "prettier --write"
     ]
   }
