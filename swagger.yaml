@@ -9,7 +9,7 @@ info:
 
     This is NOT the official congress.gov YAML and contains modifications.
 
-    Currently only supports 5/100 API operations.
+    Currently only supports 6/100 API operations.
     
     Bill API: 0/16
     
@@ -19,7 +19,7 @@ info:
     
     Congress API: 0/3
     
-    Member API: 5/8
+    Member API: 6/8
     
     Committee API: 0/10
     
@@ -139,6 +139,33 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/MemberCosponsoredLegislationResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/ResourceNotFoundErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitErrorResponse"
+  /member/{stateCode}:
+    get:
+      tags:
+        - "Congress"
+      summary: "Returns a list of congressional members by state code."
+      description: |
+        Get congress member list by state code.
+        Supports query parameters for filtering.
+      operationId: "getMembersByState"
+      parameters:
+      - $ref: "#/components/parameters/Offset"
+      - $ref: "#/components/parameters/LimitMax250"
+      - $ref: "#/components/parameters/FromDateTimeUpdateDate"
+      - $ref: "#/components/parameters/ToDateTimeUpdateDate"
+      - $ref: "#/components/parameters/CurrentMember"
+      - $ref: "#/components/parameters/MemberStateCode"
+      responses:
+        "200":
+          $ref: "#/components/responses/CongressMemberListResponse"
+        "400":
+          $ref: "#/components/responses/CongressMemberListErrorResponse"
         "403":
           $ref: "#/components/responses/ForbiddenError"
         "404":
