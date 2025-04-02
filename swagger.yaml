@@ -9,7 +9,7 @@ info:
 
     This is NOT the official congress.gov YAML and contains modifications.
 
-    Currently only supports 6/100 API operations.
+    Currently only supports 7/100 API operations.
     
     Bill API: 0/16
     
@@ -19,7 +19,7 @@ info:
     
     Congress API: 0/3
     
-    Member API: 6/8
+    Member API: 7/8
     
     Committee API: 0/10
     
@@ -51,7 +51,7 @@ info:
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-  version: "0.1.7"
+  version: "0.1.8"
 externalDocs:
   description: "Official documentation"
   url: "https://api.congress.gov/"
@@ -139,6 +139,33 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/MemberCosponsoredLegislationResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/ResourceNotFoundErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitErrorResponse"
+  /member/congress/{congress}:
+    get:
+      tags:
+        - "Congress"
+      summary: "Returns a list of congressional members by congress number."
+      description: |
+        Get congress member list by congress number.
+        Supports query parameters for filtering.
+      operationId: "getMembersByCongress"
+      parameters:
+      - $ref: "#/components/parameters/Offset"
+      - $ref: "#/components/parameters/LimitMax250"
+      - $ref: "#/components/parameters/FromDateTimeUpdateDate"
+      - $ref: "#/components/parameters/ToDateTimeUpdateDate"
+      - $ref: "#/components/parameters/CurrentMember"
+      - $ref: "#/components/parameters/MemberCongressNumber"
+      responses:
+        "200":
+          $ref: "#/components/responses/CongressMemberListResponse"
+        "400":
+          $ref: "#/components/responses/CongressMemberListErrorResponse"
         "403":
           $ref: "#/components/responses/ForbiddenError"
         "404":
@@ -251,6 +278,14 @@ components:
       required: false
       schema:
         type: "boolean"
+    MemberCongressNumber:
+      name: "congress"
+      in: "path"
+      required: true
+      description: "The member's congress number (e.g., 118 for the 118th Congress, 2023-2025)"
+      schema:
+        type: integer
+        minimum: 1
     MemberStateCode:
       name: "stateCode"
       in: "path"
