@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * Congress.gov API
- * The Congress.gov API provides programmatic access to legislative data from the United States Congress. This API enables developers to search, retrieve, and analyze legislative data including bills, resolutions, amendments, and congressional records.  This is NOT the official congress.gov YAML and contains modifications.  Currently only supports 7/100 API operations.  Bill API: 0/16  Amendments API: 0/8  Summaries API: 0/3  Congress API: 0/3  Member API: 7/8  Committee API: 0/10  Committee Report API: 0/5  Committee Print API: 0/5  Committee Meeting API: 0/4  Hearing API: 0/4  Congressional Record API: 0/1  Daily Congressional Record API: 0/4  Bound Congressional Record API: 0/4  House Communication API: 0/4  House Requirement API: 0/3  Senate Communication API: 0/4  Nomination API: 0/7  Treaty API: 0/7
+ * The Congress.gov API provides programmatic access to legislative data from the United States Congress. This API enables developers to search, retrieve, and analyze legislative data including bills, resolutions, amendments, and congressional records.  This is NOT the official congress.gov YAML and contains modifications.  Currently only supports 8/100 API operations.  Bill API: 0/16  Amendments API: 0/8  Summaries API: 0/3  Congress API: 0/3  Member API: 8/8 ✅  Committee API: 0/10  Committee Report API: 0/5  Committee Print API: 0/5  Committee Meeting API: 0/4  Hearing API: 0/4  Congressional Record API: 0/1  Daily Congressional Record API: 0/4  Bound Congressional Record API: 0/4  House Communication API: 0/4  House Requirement API: 0/3  Senate Communication API: 0/4  Nomination API: 0/7  Treaty API: 0/7
  *
  * The version of the OpenAPI document: 0.1.8
  * Contact: liudotjson@gmail.com
@@ -1137,6 +1137,111 @@ export const CongressApiAxiosParamCreator = function (
       };
     },
     /**
+     * Get congress member list by congress number and state code and district. Supports query parameters for filtering.
+     * @summary Returns a list of congressional members by congress number, state code, and district.
+     * @param {number} congress The member\&#39;s congress number (e.g., 118 for the 118th Congress, 2023-2025)
+     * @param {string} stateCode The member\&#39;s state code (pattern: ^[A-Z]{2}$).
+     * @param {string} district The member\&#39;s district number (pattern: ^\\d{2}$).
+     * @param {number} [offset] The starting record returned. 0 is the first record.
+     * @param {number} [limit] The number of records returned. The maximum limit is 250.
+     * @param {string} [fromDateTime] The starting timestamp to filter by update date. Use format: YYYY-MM-DDT00:00:00Z.
+     * @param {string} [toDateTime] The ending timestamp to filter by update date. Use format: YYYY-MM-DDT00:00:00Z.
+     * @param {boolean} [currentMember] The status of the member.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getMembersByCongressAndStateAndDistrict: async (
+      congress: number,
+      stateCode: string,
+      district: string,
+      offset?: number,
+      limit?: number,
+      fromDateTime?: string,
+      toDateTime?: string,
+      currentMember?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'congress' is not null or undefined
+      assertParamExists(
+        "getMembersByCongressAndStateAndDistrict",
+        "congress",
+        congress,
+      );
+      // verify required parameter 'stateCode' is not null or undefined
+      assertParamExists(
+        "getMembersByCongressAndStateAndDistrict",
+        "stateCode",
+        stateCode,
+      );
+      // verify required parameter 'district' is not null or undefined
+      assertParamExists(
+        "getMembersByCongressAndStateAndDistrict",
+        "district",
+        district,
+      );
+      const localVarPath = `/member/congress/{congress}/{stateCode}/{district}`
+        .replace(`{${"congress"}}`, encodeURIComponent(String(congress)))
+        .replace(`{${"stateCode"}}`, encodeURIComponent(String(stateCode)))
+        .replace(`{${"district"}}`, encodeURIComponent(String(district)));
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = {
+        method: "GET",
+        ...baseOptions,
+        ...options,
+      };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication ApiKeyAuth required
+      await setApiKeyToObject(localVarQueryParameter, "api_key", configuration);
+
+      if (offset !== undefined) {
+        localVarQueryParameter["offset"] = offset;
+      }
+
+      if (limit !== undefined) {
+        localVarQueryParameter["limit"] = limit;
+      }
+
+      if (fromDateTime !== undefined) {
+        localVarQueryParameter["fromDateTime"] =
+          (fromDateTime as any) instanceof Date
+            ? (fromDateTime as any).toISOString()
+            : fromDateTime;
+      }
+
+      if (toDateTime !== undefined) {
+        localVarQueryParameter["toDateTime"] =
+          (toDateTime as any) instanceof Date
+            ? (toDateTime as any).toISOString()
+            : toDateTime;
+      }
+
+      if (currentMember !== undefined) {
+        localVarQueryParameter["currentMember"] = currentMember;
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
      * Get congress member list by state code. Supports query parameters for filtering.
      * @summary Returns a list of congressional members by state code.
      * @param {string} stateCode The member\&#39;s state code (pattern: ^[A-Z]{2}$).
@@ -1525,6 +1630,61 @@ export const CongressApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
+     * Get congress member list by congress number and state code and district. Supports query parameters for filtering.
+     * @summary Returns a list of congressional members by congress number, state code, and district.
+     * @param {number} congress The member\&#39;s congress number (e.g., 118 for the 118th Congress, 2023-2025)
+     * @param {string} stateCode The member\&#39;s state code (pattern: ^[A-Z]{2}$).
+     * @param {string} district The member\&#39;s district number (pattern: ^\\d{2}$).
+     * @param {number} [offset] The starting record returned. 0 is the first record.
+     * @param {number} [limit] The number of records returned. The maximum limit is 250.
+     * @param {string} [fromDateTime] The starting timestamp to filter by update date. Use format: YYYY-MM-DDT00:00:00Z.
+     * @param {string} [toDateTime] The ending timestamp to filter by update date. Use format: YYYY-MM-DDT00:00:00Z.
+     * @param {boolean} [currentMember] The status of the member.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getMembersByCongressAndStateAndDistrict(
+      congress: number,
+      stateCode: string,
+      district: string,
+      offset?: number,
+      limit?: number,
+      fromDateTime?: string,
+      toDateTime?: string,
+      currentMember?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string,
+      ) => AxiosPromise<CongressMemberListResponse>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.getMembersByCongressAndStateAndDistrict(
+          congress,
+          stateCode,
+          district,
+          offset,
+          limit,
+          fromDateTime,
+          toDateTime,
+          currentMember,
+          options,
+        );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap[
+          "CongressApi.getMembersByCongressAndStateAndDistrict"
+        ]?.[localVarOperationServerIndex]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
      * Get congress member list by state code. Supports query parameters for filtering.
      * @summary Returns a list of congressional members by state code.
      * @param {string} stateCode The member\&#39;s state code (pattern: ^[A-Z]{2}$).
@@ -1730,6 +1890,31 @@ export const CongressApiFactory = function (
       return localVarFp
         .getMembersByCongress(
           requestParameters.congress,
+          requestParameters.offset,
+          requestParameters.limit,
+          requestParameters.fromDateTime,
+          requestParameters.toDateTime,
+          requestParameters.currentMember,
+          options,
+        )
+        .then((request) => request(axios, basePath));
+    },
+    /**
+     * Get congress member list by congress number and state code and district. Supports query parameters for filtering.
+     * @summary Returns a list of congressional members by congress number, state code, and district.
+     * @param {CongressApiGetMembersByCongressAndStateAndDistrictRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getMembersByCongressAndStateAndDistrict(
+      requestParameters: CongressApiGetMembersByCongressAndStateAndDistrictRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<CongressMemberListResponse> {
+      return localVarFp
+        .getMembersByCongressAndStateAndDistrict(
+          requestParameters.congress,
+          requestParameters.stateCode,
+          requestParameters.district,
           requestParameters.offset,
           requestParameters.limit,
           requestParameters.fromDateTime,
@@ -1951,6 +2136,69 @@ export interface CongressApiGetMembersByCongressRequest {
 }
 
 /**
+ * Request parameters for getMembersByCongressAndStateAndDistrict operation in CongressApi.
+ * @export
+ * @interface CongressApiGetMembersByCongressAndStateAndDistrictRequest
+ */
+export interface CongressApiGetMembersByCongressAndStateAndDistrictRequest {
+  /**
+   * The member\&#39;s congress number (e.g., 118 for the 118th Congress, 2023-2025)
+   * @type {number}
+   * @memberof CongressApiGetMembersByCongressAndStateAndDistrict
+   */
+  readonly congress: number;
+
+  /**
+   * The member\&#39;s state code (pattern: ^[A-Z]{2}$).
+   * @type {string}
+   * @memberof CongressApiGetMembersByCongressAndStateAndDistrict
+   */
+  readonly stateCode: string;
+
+  /**
+   * The member\&#39;s district number (pattern: ^\\d{2}$).
+   * @type {string}
+   * @memberof CongressApiGetMembersByCongressAndStateAndDistrict
+   */
+  readonly district: string;
+
+  /**
+   * The starting record returned. 0 is the first record.
+   * @type {number}
+   * @memberof CongressApiGetMembersByCongressAndStateAndDistrict
+   */
+  readonly offset?: number;
+
+  /**
+   * The number of records returned. The maximum limit is 250.
+   * @type {number}
+   * @memberof CongressApiGetMembersByCongressAndStateAndDistrict
+   */
+  readonly limit?: number;
+
+  /**
+   * The starting timestamp to filter by update date. Use format: YYYY-MM-DDT00:00:00Z.
+   * @type {string}
+   * @memberof CongressApiGetMembersByCongressAndStateAndDistrict
+   */
+  readonly fromDateTime?: string;
+
+  /**
+   * The ending timestamp to filter by update date. Use format: YYYY-MM-DDT00:00:00Z.
+   * @type {string}
+   * @memberof CongressApiGetMembersByCongressAndStateAndDistrict
+   */
+  readonly toDateTime?: string;
+
+  /**
+   * The status of the member.
+   * @type {boolean}
+   * @memberof CongressApiGetMembersByCongressAndStateAndDistrict
+   */
+  readonly currentMember?: boolean;
+}
+
+/**
  * Request parameters for getMembersByState operation in CongressApi.
  * @export
  * @interface CongressApiGetMembersByStateRequest
@@ -2162,6 +2410,33 @@ export class CongressApi extends BaseAPI {
     return CongressApiFp(this.configuration)
       .getMembersByCongress(
         requestParameters.congress,
+        requestParameters.offset,
+        requestParameters.limit,
+        requestParameters.fromDateTime,
+        requestParameters.toDateTime,
+        requestParameters.currentMember,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   * Get congress member list by congress number and state code and district. Supports query parameters for filtering.
+   * @summary Returns a list of congressional members by congress number, state code, and district.
+   * @param {CongressApiGetMembersByCongressAndStateAndDistrictRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof CongressApi
+   */
+  public getMembersByCongressAndStateAndDistrict(
+    requestParameters: CongressApiGetMembersByCongressAndStateAndDistrictRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return CongressApiFp(this.configuration)
+      .getMembersByCongressAndStateAndDistrict(
+        requestParameters.congress,
+        requestParameters.stateCode,
+        requestParameters.district,
         requestParameters.offset,
         requestParameters.limit,
         requestParameters.fromDateTime,

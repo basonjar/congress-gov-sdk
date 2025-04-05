@@ -1050,3 +1050,170 @@ describe("CongressApi - getMembersByCongress", () => {
     rateLimitTest(() => api.getMembersByCongress({ congress: 118 }));
   });
 });
+
+describe("CongressApi - getMembersByCongressAndStateAndDistrict", () => {
+  beforeEach(() => {
+    mockedAxios.reset();
+    jest.clearAllMocks();
+  });
+
+  it("should fetch members by congress, state and district successfully", async () => {
+    const mockResponse: CongressMemberListResponse = {
+      members: [
+        {
+          bioguideId: "A000000",
+          depiction: {
+            attribution: "Biographical Directory of the United States Congress",
+            imageUrl:
+              "https://bioguide.congress.gov/bioguide/photo/A/A000000.jpg",
+          },
+          district: 1,
+          name: "Test Member",
+          partyName: "Democratic",
+          state: "CA",
+          terms: {
+            item: [
+              {
+                chamber: Chamber.HouseOfRepresentatives,
+                startYear: 2023,
+                endYear: 2025,
+              },
+            ],
+          },
+          updateDate: "2023-01-01T00:00:00Z",
+        },
+      ],
+      pagination: {
+        count: 1,
+        next: "https://api.congress.gov/v3/member/congress/118/CA/1?offset=1",
+      },
+    };
+
+    mockedAxios
+      .onGet(/\/v3\/member\/congress\/118\/CA\/1(\?.*)?$/)
+      .reply(200, mockResponse);
+
+    const response = await api.getMembersByCongressAndStateAndDistrict({
+      congress: 118,
+      stateCode: "CA",
+      district: "1",
+    });
+    const data = response.data;
+
+    expect(data).toBeDefined();
+    expect(data.members).toBeDefined();
+    expect(data.members.length).toBe(1);
+    expect(data.members[0].bioguideId).toBe("A000000");
+    expect(data.members[0].name).toBe("Test Member");
+    expect(data.members[0].partyName).toBe("Democratic");
+    expect(data.members[0].state).toBe("CA");
+    expect(data.members[0].district).toBe(1);
+    expect(data.members[0].terms.item).toBeDefined();
+    expect(data.members[0].terms.item!.length).toBe(1);
+    expect(data.members[0].terms.item![0].chamber).toBe(
+      Chamber.HouseOfRepresentatives,
+    );
+    expect(data.members[0].terms.item![0].startYear).toBe(2023);
+    expect(data.members[0].terms.item![0].endYear).toBe(2025);
+    expect(data.pagination).toBeDefined();
+    expect(data.pagination.count).toBe(1);
+    expect(data.pagination.next).toBe(
+      "https://api.congress.gov/v3/member/congress/118/CA/1?offset=1",
+    );
+    expect(data.pagination.prev).toBeUndefined();
+    expect(mockedAxios.history.length).toBe(1);
+  });
+
+  it("should fetch members by congress, state and district with all optional parameters", async () => {
+    const mockResponse: CongressMemberListResponse = {
+      members: [],
+      pagination: {
+        count: 0,
+      },
+    };
+
+    mockedAxios.onGet().reply(200, mockResponse);
+
+    const params = {
+      congress: 118,
+      stateCode: "CA",
+      district: "1",
+      offset: 10,
+      limit: 50,
+      fromDateTime: "2023-01-01T00:00:00Z",
+      toDateTime: "2023-12-31T00:00:00Z",
+      currentMember: true,
+    };
+
+    await api.getMembersByCongressAndStateAndDistrict(params);
+
+    expect(mockedAxios.history.length).toBe(1);
+    const request = mockedAxios.history[0];
+    expect(request.data).toBeUndefined();
+    expect(request.url).toContain("api_key=test-api-key");
+    expect(request.url).toContain("offset=10");
+    expect(request.url).toContain("limit=50");
+    expect(decodeURIComponent(request.url!)).toContain(
+      "fromDateTime=2023-01-01T00:00:00Z",
+    );
+    expect(decodeURIComponent(request.url!)).toContain(
+      "toDateTime=2023-12-31T00:00:00Z",
+    );
+    expect(request.url).toContain("currentMember=true");
+  });
+
+  describe("Error Handling", () => {
+    it("should handle 400 errors when fetching members by congress, state and district", async () => {
+      mockedAxios.onGet().reply(400, {
+        error: "Bad request",
+      });
+
+      try {
+        await api.getMembersByCongressAndStateAndDistrict({
+          congress: 118,
+          stateCode: "CA",
+          district: "1",
+        });
+      } catch (e) {
+        const error = e as AxiosError;
+        expect(error.message).toBe("Request failed with status code 400");
+        expect(error.response).toBeDefined();
+        expect(error.response!.status).toBe(400);
+        expect(error.response!.data).toBeDefined();
+        const errorResponse = error.response!
+          .data as CongressMemberListErrorResponse;
+        expect(errorResponse.error).toBe("Bad request");
+      }
+      expect.assertions(5);
+    });
+
+    invalidKeyTest(() =>
+      api.getMembersByCongressAndStateAndDistrict({
+        congress: 118,
+        stateCode: "CA",
+        district: "1",
+      }),
+    );
+    missingKeyTest(() =>
+      api.getMembersByCongressAndStateAndDistrict({
+        congress: 118,
+        stateCode: "CA",
+        district: "1",
+      }),
+    );
+    resourceNotFoundTest(() =>
+      api.getMembersByCongressAndStateAndDistrict({
+        congress: 118,
+        stateCode: "CA",
+        district: "1",
+      }),
+    );
+    rateLimitTest(() =>
+      api.getMembersByCongressAndStateAndDistrict({
+        congress: 118,
+        stateCode: "CA",
+        district: "1",
+      }),
+    );
+  });
+});

@@ -37,4 +37,6 @@ openapi-generator-cli generate \
 
 mv src/package.json .
 
+npm run pretty
+
 echo "SDK generation complete with properties: $ADDITIONAL_PROPERTIES"
